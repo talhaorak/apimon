@@ -122,6 +122,10 @@ const incidentStatusColors: Record<string, string> = {
   resolved: "bg-emerald-400",
 };
 
+export function generateStaticParams() {
+  return [{ slug: "acme-corp" }];
+}
+
 export default function PublicStatusPage() {
   const data = statusPageData;
   // Determine overall status based on monitors
