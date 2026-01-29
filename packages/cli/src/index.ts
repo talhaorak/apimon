@@ -1,76 +1,50 @@
 #!/usr/bin/env node
 // ============================================================
-// apimon CLI — CLI-first API Monitoring
+// apimon CLI — CLI-first API Monitoring & Alerting
 // ============================================================
 
 import { Command } from "commander";
+import { registerCheckCommand } from "./commands/check.js";
+import { registerInitCommand } from "./commands/init.js";
+import { registerLoginCommand } from "./commands/login.js";
+import { registerAddCommand } from "./commands/add.js";
+import { registerListCommand } from "./commands/list.js";
+import { registerStatusCommand } from "./commands/status.js";
+import { registerRemoveCommand } from "./commands/remove.js";
+import { registerAlertsCommand } from "./commands/alerts.js";
 
 const program = new Command();
 
 program
   .name("apimon")
   .description("CLI-first API Monitoring & Alerting")
-  .version("0.1.0");
+  .version("0.1.0", "-v, --version");
 
-program
-  .command("check <url>")
-  .description("One-shot HTTP check (no account needed)")
-  .option("-m, --method <method>", "HTTP method", "GET")
-  .option("-t, --timeout <ms>", "Timeout in milliseconds", "30000")
-  .action((url: string, options: { method: string; timeout: string }) => {
-    console.log(`Checking ${url} (${options.method}, timeout: ${options.timeout}ms)...`);
-    // TODO(@backend): Implement HTTP check logic
-  });
+// Register all commands
+registerCheckCommand(program);
+registerInitCommand(program);
+registerLoginCommand(program);
+registerAddCommand(program);
+registerListCommand(program);
+registerStatusCommand(program);
+registerRemoveCommand(program);
+registerAlertsCommand(program);
 
-program
-  .command("init")
-  .description("Create .apimon.yaml config file")
-  .action(() => {
-    console.log("Initializing apimon config...");
-    // TODO(@backend): Implement config init
-  });
+// Parse and run
+await program.parseAsync();
 
-program
-  .command("login")
-  .description("Authenticate with API key")
-  .action(() => {
-    console.log("Login flow...");
-    // TODO(@backend): Implement login
-  });
+// ── Auto-update check (stub) ──
+checkForUpdates().catch(() => {
+  /* silently ignore update check failures */
+});
 
-program
-  .command("add <url>")
-  .description("Add a new monitor")
-  .option("-n, --name <name>", "Monitor name")
-  .option("-m, --method <method>", "HTTP method", "GET")
-  .option("-i, --interval <seconds>", "Check interval in seconds", "300")
-  .action((url: string, options: { name?: string; method: string; interval: string }) => {
-    console.log(`Adding monitor: ${url}`, options);
-    // TODO(@backend): Implement add monitor
-  });
-
-program
-  .command("list")
-  .description("List all monitors")
-  .action(() => {
-    console.log("Listing monitors...");
-    // TODO(@backend): Implement list monitors
-  });
-
-program
-  .command("status")
-  .description("Show current status of all monitors")
-  .action(() => {
-    console.log("Fetching status...");
-    // TODO(@backend): Implement status
-  });
-
-program
-  .command("remove <id>")
-  .description("Remove a monitor")
-  .action((id: string) => {
-    console.log(`Removing monitor: ${id}`);
-    // TODO(@backend): Implement remove
-  });
-
-program.parse();
+async function checkForUpdates(): Promise<void> {
+  // TODO: Implement actual version check against npm registry
+  // Example:
+  //   const res = await fetch("https://registry.npmjs.org/@apimon/cli/latest");
+  //   const data = await res.json();
+  //   if (data.version !== program.version()) {
+  //     console.log(`\n  💡 New version available: ${data.version}`);
+  //     console.log(`     Run: npm update -g @apimon/cli\n`);
+  //   }
+}

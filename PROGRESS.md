@@ -158,3 +158,61 @@ Indexes: user_id lookups, monitor_id + checked_at composite, state filters, slug
 - Add request logging/metrics
 - Multi-region check support
 - Response body assertion checks
+
+---
+
+## 🖥️ CLI DEVELOPER — 2025-07-29
+
+### ✅ Completed
+
+#### 1. Core Infrastructure
+- **`src/config.ts`** — Config file management for `~/.apimon/config.yaml` (global) and `.apimon.yaml` (local), with read/write/update helpers, API URL resolution (local → global → default), API key retrieval
+- **`src/output.ts`** — Rich terminal output: chalk-powered colors, status icons (●/✓/✗), message helpers (success/error/warning/info/header/divider), formatMs/formatPercent/formatInterval/timeAgo/formatDate, table creation (cli-table3 with Unicode box-drawing), ora spinner factory, centralized error handler with graceful Ctrl+C handling
+- **`src/api-client.ts`** — Typed HTTP client (`ApiClient` class) for all API endpoints (monitors CRUD, stats, alert channels, auth validation), custom `ApiClientError` with status codes, friendly error messages for 401/403/404/429/network errors, `createAuthenticatedClient()` factory
+
+#### 2. Commands (8 total)
+
+| Command | File | Auth | Description |
+|---------|------|------|-------------|
+| `apimon check <url>` | `commands/check.ts` | ❌ | One-shot HTTP check with timing, color-coded status, priority-sorted headers, supports --method/--timeout/--headers/--body, auto-prepends https://, validates HTTP methods, handles DNS/timeout/SSL errors gracefully |
+| `apimon init` | `commands/init.ts` | ❌ | Interactive setup with @inquirer/prompts, writes .apimon.yaml with comments, guards against overwrite |
+| `apimon login` | `commands/login.ts` | ❌ | Accepts --key flag or masked interactive prompt, validates key against API, saves to ~/.apimon/config.yaml |
+| `apimon add <url>` | `commands/add.ts` | ✅ | Interactive mode (no --name) or flag-based, prompts for name/method/interval/status/timeout, creates monitor via API |
+| `apimon list` | `commands/list.ts` | ✅ | Table with ID/Name/URL/Status/Uptime/RespTime, color-coded status, --json for raw output, --status filter (up/down/all) |
+| `apimon status [id]` | `commands/status.ts` | ✅ | Without ID: summary (up/down/total/avg response/uptime/checks/incidents). With ID: detailed view with last check time, uptime %, interval, recent incidents |
+| `apimon remove <id>` | `commands/remove.ts` | ✅ | Shows monitor info, confirmation prompt (--force to skip), clean removal message |
+| `apimon alerts` | `commands/alerts.ts` | ✅ | Table with Type/Name/Verified/Created for all alert channels |
+
+#### 3. Polish & DX
+- `--version` / `-v` shows version
+- `--help` / `-h` for all commands and subcommands
+- Color-coded everything: green=success/2xx, yellow=redirect/3xx, red=error/4xx/5xx
+- Unicode symbols throughout (✓ ✗ ● ⚠ ℹ →)
+- Response time color coding: green <200ms, yellow <500ms, red >500ms
+- Uptime color coding: green ≥99%, yellow ≥95%, red <95%
+- Auto-update check stub (ready for npm registry integration)
+- Friendly error messages (never stack traces)
+- Graceful Ctrl+C handling during interactive prompts
+- Non-zero exit code on failures
+- bin entry: `"apimon" → "./dist/index.js"` with shebang
+
+#### 4. Dependencies Added
+- `chalk` ^5.6.2 (ESM-only terminal colors)
+- `ora` ^9.1.0 (loading spinners)
+- `@inquirer/prompts` ^8.2.0 (interactive prompts)
+- `yaml` ^2.8.2 (config file parsing)
+- `cli-table3` ^0.6.5 (table formatting)
+
+### 📝 Build Verification
+- `bun run build --filter=@apimon/cli` ✅ (TypeScript strict mode, zero errors)
+- `bun packages/cli/src/index.ts --help` ✅ (all 8 commands listed)
+- `bun packages/cli/src/index.ts check httpbin.org/get` ✅ (200 OK, headers, timing)
+- `bun packages/cli/src/index.ts check httpbin.org/status/404` ✅ (red 404, exit code 1)
+- `bun packages/cli/src/index.ts check nonexistent.invalid` ✅ (DNS error, friendly message)
+- `bun packages/cli/src/index.ts check httpbin.org/post -m POST -b '{"test":true}'` ✅ (POST with body)
+- Auth-required commands without login → clean "Not authenticated" message ✅
+
+### 📝 Notes
+- Pre-existing `@apimon/web` build error (type mismatch in marketing page) — not in CLI scope
+- All types imported from `@apimon/shared` — no local type duplication
+- Files never modified outside `packages/cli/`
