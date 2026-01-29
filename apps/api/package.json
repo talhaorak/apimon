@@ -1,0 +1,21 @@
+{
+  "name": "@apimon/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "bun --watch src/index.ts",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.7.0",
+    "@apimon/shared": "workspace:*",
+    "@apimon/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3"
+  }
+}

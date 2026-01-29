@@ -1,0 +1,26 @@
+{
+  "name": "@apimon/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000",
+    "start": "next start",
+    "lint": "next lint",
+    "clean": "rm -rf .next",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^15.3.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@apimon/shared": "workspace:*",
+    "@apimon/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.3"
+  }
+}
