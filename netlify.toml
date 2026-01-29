@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  BUN_VERSION = "1.2.15"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
